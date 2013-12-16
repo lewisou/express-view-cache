@@ -4,7 +4,7 @@ var adapterMemory = require('./lib/adapterMemory.js'),
 // Caching middleware for Express framework
 // details are here https://github.com/vodolaz095/express-view-cache
 
-var set_cache = function(request, response, next) {
+var set_cache = function(request, response, next, invalidateTimeInMilliseconds) {
     //http://stackoverflow.com/questions/13690335/node-js-express-simple-middleware-to-output-first-few-characters-of-response?rq=1
     var end = response.end;
     response.end = function(chunk, encoding){
@@ -32,13 +32,13 @@ module.exports=function(invalidateTimeInMilliseconds,parameters){
         invalidateTimeInMilliseconds=60*1000; //1 minute
     }
     if (parameters && parameters.driver) {
-        console.log('parameters.driver');
+        console.log(parameters.driver);
         switch (parameters.driver) {
             case 'memjs':
                 cache = adapterMemJS;
                 break;
             case 'redis':
-                // cache = require('./lib/adapterRedis.js');
+                cache = require('./lib/adapterRedis.js');
                 break;
             default :
                 cache = adapterMemory;
@@ -53,7 +53,7 @@ module.exports=function(invalidateTimeInMilliseconds,parameters){
         }
         if (request.method == 'GET') {
             if(request.query.no_cache == 'yes') {
-                return set_cache(request, response, next);
+                return set_cache(request, response, next, invalidateTimeInMilliseconds);
             } else {
                 cache.get(request.originalUrl,function(err,value){
                     if(value){
@@ -62,7 +62,7 @@ module.exports=function(invalidateTimeInMilliseconds,parameters){
                         response.send(value);
                         return true;
                     } else {
-                        return set_cache(request, response, next);
+                        return set_cache(request, response, next, invalidateTimeInMilliseconds);
                     }
                 });
             }
