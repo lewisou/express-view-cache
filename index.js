@@ -32,12 +32,13 @@ module.exports=function(invalidateTimeInMilliseconds,parameters){
         invalidateTimeInMilliseconds=60*1000; //1 minute
     }
     if (parameters && parameters.driver) {
+        console.log('parameters.driver');
         switch (parameters.driver) {
             case 'memjs':
                 cache = adapterMemJS;
                 break;
             case 'redis':
-                cache = require('./lib/adapterRedis.js');
+                // cache = require('./lib/adapterRedis.js');
                 break;
             default :
                 cache = adapterMemory;
